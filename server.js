@@ -1,7 +1,6 @@
 import cors from 'cors';
 import dotenv from 'dotenv';
 import express from 'express';
-import helmet from 'helmet';
 import multer from 'multer';
 import rateLimit from 'express-rate-limit';
 
@@ -256,7 +255,6 @@ else if (TRUST_PROXY_VALUE === 'false' || TRUST_PROXY_VALUE === '') app.set('tru
 else if (!Number.isNaN(Number(TRUST_PROXY_VALUE))) app.set('trust proxy', Number(TRUST_PROXY_VALUE));
 else app.set('trust proxy', TRUST_PROXY_VALUE);
 
-app.use(helmet());
 app.use(cors({
   origin(origin, callback) {
     if (!origin) {
