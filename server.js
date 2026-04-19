@@ -1,7 +1,6 @@
 import cors from 'cors';
 import dotenv from 'dotenv';
 import express from 'express';
-import multer from 'multer';
 import rateLimit from 'express-rate-limit';
 
 dotenv.config();
@@ -27,11 +26,6 @@ const ALLOWED_ORIGINS = String(process.env.CORS_ORIGINS || '')
   .filter(Boolean);
 const IS_PRODUCTION = process.env.NODE_ENV === 'production';
 const TRUST_PROXY_VALUE = String(process.env.TRUST_PROXY || '').trim().toLowerCase();
-
-const upload = multer({
-  storage: multer.memoryStorage(),
-  limits: { fileSize: 10 * 1024 * 1024 },
-});
 
 const riskWords = [
   'хочу умереть', 'не хочу жить', 'лучше бы меня не было', 'убить себя', 'покончить с собой',
@@ -395,7 +389,7 @@ app.post('/chat-support', aiLimiter, async (req, res) => {
   }
 });
 
-app.post('/transcribe', aiLimiter, upload.single('file'), async (req, res) => {
+app.post('/transcribe', aiLimiter, async (req, res) => {
   try {
     if (!OPENAI_API_KEY_CONFIGURED) {
       return res.status(503).json({ ok: false, text: '', error: 'OPENAI_API_KEY is not configured' });
