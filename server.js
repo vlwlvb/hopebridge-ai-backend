@@ -1,7 +1,6 @@
 import cors from 'cors';
 import dotenv from 'dotenv';
 import express from 'express';
-import rateLimit from 'express-rate-limit';
 
 dotenv.config();
 
@@ -240,9 +239,6 @@ function buildTranscript({ recentMessages = [], categoryTitle = '', subcategory 
   ].filter(Boolean).join('\n\n');
 }
 
-const baseLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 300, standardHeaders: true, legacyHeaders: false });
-const aiLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 80, standardHeaders: true, legacyHeaders: false });
-
 app.disable('x-powered-by');
 if (TRUST_PROXY_VALUE === 'true') app.set('trust proxy', true);
 else if (TRUST_PROXY_VALUE === 'false' || TRUST_PROXY_VALUE === '') app.set('trust proxy', false);
@@ -266,7 +262,6 @@ app.use(cors({
     callback(new Error('Origin not allowed by CORS'));
   },
 }));
-app.use(baseLimiter);
 app.use(express.json({ limit: '1mb' }));
 app.use((req, res, next) => {
   res.setTimeout(REQUEST_TIMEOUT_MS + 5000);
@@ -287,7 +282,7 @@ app.get('/health', (req, res) => {
   });
 });
 
-app.post('/chat-support', aiLimiter, async (req, res) => {
+app.post('/chat-support', async (req, res) => {
   try {
     const body = req.body && typeof req.body === 'object' ? req.body : {};
     const categoryKey = String(body.categoryKey || 'anxiety').trim() || 'anxiety';
@@ -389,7 +384,7 @@ app.post('/chat-support', aiLimiter, async (req, res) => {
   }
 });
 
-app.post('/transcribe', aiLimiter, async (req, res) => {
+app.post('/transcribe', async (req, res) => {
   try {
     if (!OPENAI_API_KEY_CONFIGURED) {
       return res.status(503).json({ ok: false, text: '', error: 'OPENAI_API_KEY is not configured' });
